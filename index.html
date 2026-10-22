@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Smart Greenhouse SCADA Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="logo-icon">🌱</span>
+                <h2>SmartAgro <span class="badge">IoT</span></h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="dashboard">
+                    <span class="icon">📊</span> Мониторинг (Dashboard)
+                </button>
+                <button class="nav-btn" data-tab="zones">
+                    <span class="icon">🪴</span> Зоны теплицы
+                </button>
+                <button class="nav-btn" data-tab="sensors">
+                    <span class="icon">📡</span> Датчики
+                </button>
+                <button class="nav-btn" data-tab="control">
+                    <span class="icon">🎛️</span> Управление (Actuators)
+                </button>
+                <button class="nav-btn" data-tab="alerts">
+                    <span class="icon">🚨</span> Аварии и Alerts
+                </button>
+                <button class="nav-btn" data-tab="analytics">
+                    <span class="icon">🧠</span> Smart Analytics
+                </button>
+                <button class="nav-btn" data-tab="settings">
+                    <span class="icon">⚙️</span> Настройки
+                </button>
+                <button class="nav-btn" data-tab="profile">
+                    <span class="icon">👨‍💻</span> Разработчик
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator online">
+                    <span class="dot"></span> Симулятор IoT активен
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="page-title">
+                    <h1 id="current-title">Панель управления теплицей</h1>
+                    <span class="subtitle" id="last-update">Синхронизация...</span>
+                </div>
+                <div class="topbar-actions">
+                    <div class="sim-controls">
+                        <label>Скорость симулятора:</label>
+                        <select id="sim-speed-select">
+                            <option value="2000">2 сек</option>
+                            <option value="5000" selected>5 сек</option>
+                            <option value="10000">10 сек</option>
+                        </select>
+                    </div>
+                    <button id="theme-toggle" class="btn-icon" title="Переключить тему">🌙</button>
+                </div>
+            </header>
+
+            <!-- Dynamic Views Container -->
+            <div class="content-body">
+                
+                <!-- VIEW 1: DASHBOARD -->
+                <section id="view-dashboard" class="tab-view active">
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Ср. Температура</span>
+                                <span class="kpi-icon">🌡️</span>
+                            </div>
+                            <div class="kpi-value" id="kpi-temp">-- °C</div>
+                            <div class="kpi-sub">Норма: 20 - 28 °C</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Влажность воздуха</span>
+                                <span class="kpi-icon">💨</span>
+                            </div>
+                            <div class="kpi-value" id="kpi-humidity">-- %</div>
+                            <div class="kpi-sub">Норма: 50 - 80 %</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Влажность почвы</span>
+                                <span class="kpi-icon">💧</span>
+                            </div>
+                            <div class="kpi-value" id="kpi-soil">-- %</div>
+                            <div class="kpi-sub">Норма: 35 - 75 %</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Запас воды в баке</span>
+                                <span class="kpi-icon">🛢️</span>
+                            </div>
+                            <div class="kpi-value" id="kpi-water">-- %</div>
+                            <div class="kpi-sub warning-text" id="kpi-water-status">Запас в норме</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Активные Аварии</span>
+                                <span class="kpi-icon">🚨</span>
+                            </div>
+                            <div class="kpi-value" id="kpi-alerts-count">0</div>
+                            <div class="kpi-sub">Требуют внимания</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>Динамика Температуры (°C)</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-temp"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Влажность Почвы (%)</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-soil"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Освещённость (Lux) и CO₂ (PPM)</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-light-co2"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Уровень риска и Оценка безопасности</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-risk"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: ZONES -->
+                <section id="view-zones" class="tab-view">
+                    <div class="section-header">
+                        <h2>Зоны Выращивания</h2>
+                        <p>Мониторинг и управление micro-climate параметрами по сектором</p>
+                    </div>
+                    <div class="zones-grid" id="zones-container">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- VIEW 3: SENSORS -->
+                <section id="view-sensors" class="tab-view">
+                    <div class="section-header">
+                        <h2>Датчики IoT Telemetry</h2>
+                        <input type="text" id="sensor-search" class="input-search" placeholder="Поиск по названию, зоне или типу...">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Датчика</th>
+                                    <th>Зона</th>
+                                    <th>Тип</th>
+                                    <th>Текущее значение</th>
+                                    <th>Статус</th>
+                                    <th>Поледнее обновление</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sensors-table-body">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: CONTROL -->
+                <section id="view-control" class="tab-view">
+                    <div class="section-header">
+                        <h2>Управление Исполнительными Устройствами (Actuators)</h2>
+                        <p>Переключайте режим AUTO/MANUAL для каждой зоны и управляйте реле</p>
+                    </div>
+                    <div class="control-grid" id="control-container">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- VIEW 5: ALERTS & EVENTS -->
+                <section id="view-alerts" class="tab-view">
+                    <div class="section-header">
+                        <h2>Аварии и Журнал Событий (Event Log)</h2>
+                        <div class="filter-bar">
+                            <select id="alert-severity-filter">
+                                <option value="all">Все уровни</option>
+                                <option value="critical">Critical</option>
+                                <option value="warning">Warning</option>
+                            </select>
+                            <button id="clear-events-btn" class="btn btn-secondary">Очистить журнал</button>
+                        </div>
+                    </div>
+                    <div class="events-layout">
+                        <div class="alerts-panel">
+                            <h3>Активные Аварийные Сообщения</h3>
+                            <div id="alerts-list"></div>
+                        </div>
+                        <div class="log-panel">
+                            <h3>Журнал Автоматики и Действий</h3>
+                            <div class="log-scroll" id="events-log-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 6: ANALYTICS -->
+                <section id="view-analytics" class="tab-view">
+                    <div class="section-header">
+                        <h2>Smart Analytics & Recommendation Engine</h2>
+                        <p>Автоматический расчет аномалий, индекса риска и рекомендации для агронома</p>
+                    </div>
+                    <div class="analytics-grid" id="analytics-container">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- VIEW 7: SETTINGS -->
+                <section id="view-settings" class="tab-view">
+                    <div class="section-header">
+                        <h2>Настройки Пороговых Значений (Thresholds)</h2>
+                    </div>
+                    <div class="settings-card">
+                        <form id="settings-form">
+                            <h3>Пороговые Значения Климата</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Мин. Температура (°C)</label>
+                                    <input type="number" id="setting-temp-min" value="20">
+                                </div>
+                                <div class="form-group">
+                                    <label>Макс. Температура (°C)</label>
+                                    <input type="number" id="setting-temp-max" value="28">
+                                </div>
+                                <div class="form-group">
+                                    <label>Мин. Влажность Почвы (%)</label>
+                                    <input type="number" id="setting-soil-min" value="35">
+                                </div>
+                                <div class="form-group">
+                                    <label>Макс. Влажность Почвы (%)</label>
+                                    <input type="number" id="setting-soil-max" value="75">
+                                </div>
+                                <div class="form-group">
+                                    <label>Мин. Освещенность (Lux)</label>
+                                    <input type="number" id="setting-light-min" value="12000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Критический Запас Воды (%)</label>
+                                    <input type="number" id="setting-water-critical" value="15">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+                                <button type="button" id="reset-data-btn" class="btn btn-danger">Сбросить все данные к дефолтным</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- VIEW 8: DEVELOPER PROFILE -->
+                <section id="view-profile" class="tab-view">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="avatar">👨‍💻</div>
+                            <div>
+                                <h2>Информация о Разработчике и Проекте</h2>
+                                <p class="subtitle">Учебный проект IoT Smart Greenhouse</p>
+                            </div>
+                        </div>
+                        <div class="profile-body">
+                            <div class="info-row">
+                                <strong>Автор:</strong>
+                                <span>Эшимбаев Темирлан</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Курс / Специализация:</strong>
+                                <span>Web Development & IoT Smart Agriculture Systems</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Биография & Описание:</strong>
+                                <p>Проект разработан в рамках практического курса по IoT, фронтенд-разработке и автоматизации сельского хозяйства. В проекте реализована полноценная эмуляция реального времени, система гистерезиса контроллеров, алгоритмы расчета риска и блокировки оборудования по технике безопасности.</p>
+                            </div>
+                            <div class="info-row">
+                                <strong>Стек технологий:</strong>
+                                <span>HTML5, CSS3 Grid/Flexbox, ES6+ JavaScript, Chart.js, LocalStorage, GitHub Pages</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/simulator.js"></script>
+    <script src="assets/js/automation.js"></script>
+    <script src="assets/js/analytics.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
